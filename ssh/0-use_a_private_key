@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+# Using ssh to connect to server
 SERVER_ADDRESS="34.228.7.204"
 
 ssh -i ~/.ssh/school ubuntu@"$SERVER_ADDRESS"
