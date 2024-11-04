@@ -1,0 +1,30 @@
+#!/usr/bin/env/bash
+# Installing Nginx and configuring index page content
+sudo apt-get update -qq
+if ! sudo apt-get install -y nginx; then
+  echo "Failed to install Nginx."
+  exit 1
+fi
+
+if ! sudo sed -i 's/listen 80 default_server;/listen 80;/' /etc/nginx/sites-available/default; then
+  echo "Failed to update Nginx configuration."
+  exit 1
+fi
+
+if ! echo "Holberton School is a random one, eh?" | sudo tee /var/www/html/index.nginx-debian.html > /dev/null; then
+  echo "Failed to set up the default page content."
+  exit 1
+fi
+
+if ! sudo service nginx restart; then
+  echo "Failed to restart Nginx."
+  exit 1
+fi
+
+if curl -s http://localhost | grep -q "Holberton School"; then
+  echo "Nginx is successfully configured and displaying 'Holberton School'."
+else
+  echo "Failed to configure Nginx correctly."
+  exit 1
+fi
+
