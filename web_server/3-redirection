@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+sudo sed -i '/location \/ {/a \\tlocation /redirect_me {\n\t\trewrite ^.*$ http://new-destination-url.com permanent;\n\t}' /etc/nginx/sites-available/default
+sudo systemctl restart nginx
+
+echo "301 redirection has been set up successfully."
