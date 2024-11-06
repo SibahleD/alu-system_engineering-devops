@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# changing configuration such that /redirect_me is redirecting to another page
 sudo sed -i '/location \/ {/a \\tlocation /redirect_me {\n\t\trewrite ^.*$ http://new-destination-url.com permanent;\n\t}' /etc/nginx/sites-available/default
 sudo systemctl restart nginx
 
