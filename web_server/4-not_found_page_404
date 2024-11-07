@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# making custom 404 page
+sudo apt-get update
+
+sudo apt-get install -y nginx
+
+CUSTOM_404_PAGE="
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<h1>404 Not Found</h1>
+<p>Ceci n'est pas une page</p>
+</body>
+</html>
+"
+
+echo "$CUSTOM_404_PAGE" | sudo tee /var/www/html/404.html > /dev/null
+
+NGINX_CONFIG="
+server {
+    listen 80;
+    server_name _;
+
+    # Redirection block from the previous task
+    location /redirect_me {
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+    }
+
+    # Root location for default requests
+    location / {
+        root /var/www/html;
+        index index.html index.htm;
+        try_files \$uri \$uri/ =404;
+    }
+
+    # Custom error page for 404 errors
+    error_page 404 /404.html;
+    location = /404.html {
+        internal;
+    }
+}
+"
+
+echo "$NGINX_CONFIG" | sudo tee /etc/nginx/sites-available/default > /dev/null
+
+sudo service nginx restart
+
+echo "Nginx installed with custom 404 page configured!"
