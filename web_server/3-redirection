@@ -1,6 +1,21 @@
 #!/usr/bin/env bash
-# changing configuration such that /redirect_me is redirecting to another page
-sudo sed -i '/location \/ {/a \\tlocation /redirect_me {\n\t\trewrite ^.*$ http://new-destination-url.com permanent;\n\t}' /etc/nginx/sites-available/default
-sudo systemctl restart nginx
+# Configuring my Nginx server so that /redirect_me is redirecting to another page
+sudo apt-get update
+sudo apt-get install -y nginx
+REDIRECT_CONFIG="
+server {
+    listen 80;
+    server_name _;
+    location /redirect_me {
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+    }
+    location / {
+        root /var/www/html;
+        index index.html index.htm;
+    }
+}
+"
+echo "$REDIRECT_CONFIG" | sudo tee /etc/nginx/sites-available/default > /dev/null
+sudo service nginx restart
+echo "Nginx installed and redirection configured successfully!"
 
-echo "301 redirection has been set up successfully."
