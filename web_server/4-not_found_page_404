@@ -1,48 +1,33 @@
 #!/usr/bin/env bash
 # making custom 404 page
-sudo apt-get update
+#!/usr/bin/env bash
+# bash script that configures Nginx server to respond to status code '404',
+# that returns a custom Error 404 page containing "Ceci n'est pas une page".
 
-sudo apt-get install -y nginx
+apt-get update
+apt-get install -y nginx
 
-CUSTOM_404_PAGE="
-<html>
-<head><title>404 Not Found</title></head>
-<body>
-<h1>404 Not Found</h1>
-<p>Ceci n'est pas une page</p>
-</body>
-</html>
-"
+mkdir /etc/nginx/html
+touch /etc/nginx/html/index.html
+echo "Holberton School" > /etc/nginx/html/index.html
+touch /etc/nginx/html/404.html
+echo "Ceci n'est pas une page" > /etc/nginx/html/404.html
 
-echo "$CUSTOM_404_PAGE" | sudo tee /var/www/html/404.html > /dev/null
-
-NGINX_CONFIG="
-server {
+printf %s "server {
     listen 80;
-    server_name _;
+    listen [::]:80 default_server;
+    root   /etc/nginx/html;
+    index  index.html index.htm;
 
-    # Redirection block from the previous task
     location /redirect_me {
-        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+        return 301 https/github.com/elhameed/;
     }
 
-    # Root location for default requests
-    location / {
-        root /var/www/html;
-        index index.html index.htm;
-        try_files \$uri \$uri/ =404;
-    }
-
-    # Custom error page for 404 errors
     error_page 404 /404.html;
-    location = /404.html {
-        internal;
+    location /404 {
+      root /etc/nginx/html;
+      internal;
     }
-}
-"
+}" > /etc/nginx/sites-available/default
 
-echo "$NGINX_CONFIG" | sudo tee /etc/nginx/sites-available/default > /dev/null
-
-sudo service nginx restart
-
-echo "Nginx installed with custom 404 page configured!"
+service nginx restart
