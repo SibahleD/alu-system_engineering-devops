@@ -1,0 +1,15 @@
+etting up load balancing
+sudo apt update -y
+sudo apt install haproxy -y
+echo 'ENABLED=1' | sudo tee -a /etc/default/haproxy
+printf %s 'backend web-backend
+        balance roundrobin
+        server 6347-web-01 34.228.7.204:80 check
+        server 6347-web-02 54.174.160.165:80 check
+frontend http
+        bind *:80
+        mode http
+        default_backend web-backend
+        mode http
+' | sudo tee -a /etc/haproxy/haproxy.cfg
+sudo service haproxy restart
