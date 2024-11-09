@@ -1,27 +1,71 @@
 #!/usr/bin/env bash
 # Script to set up custom HTTP response headers and error pages in NGINX
-REDIR="\\\tlocation /redirect_me {\n\t\t return 301 https://onepiece.fandom.com/wiki/One_Piece_Wiki;\n\t}\n"
-ERRDIR="\\\n\terror_page 404 /custom_404.html;\n\tlocation = /custom_404.html {\n\t\troot /var/www/html;\n\t\tinternal;\n\t}\n"
-SRC="/etc/nginx/sites-available/default"  # Corrected path
-HEADER="\\\n\tadd_header X-Served-By \$HOSTNAME;\n"
+echo -e "Updating and doing some minor checks...\n"
 
-sudo apt-get -y update
-sudo apt-get -y install nginx
+function install() {
+        command -v "$1" &> /dev/null
 
-sudo systemctl start nginx
+        if [ $? -ne 0 ]; then
+                echo -e "       Installing: $1$\n"
+                sudo apt-get update -y -qq && \
+                        sudo apt-get install -y "$1" -qq
+                echo -e "\n"
+        else
+                echo -e "       ${1} is already installed.\n"
+        fi
+}
 
-echo "Holberton School" | sudo tee /var/www/html/index.nginx-debian.html
+install nginx #install nginx
 
-sudo sed -i "30i $REDIR" $SRC
-sudo sed -i "28i $HEADER" $SRC
+echo -e "\nSetting up some minor stuff.\n"
 
-echo "Ceci n'est pas une page" | sudo tee /var/www/html/custom_404.html
+sudo ufw allow 'Nginx HTTP'
 
-sudo sed -i "48i $ERRDIR" $SRC
-
-if [ ! -f "/etc/nginx/sites-enabled/default" ]; then
-    sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
+if [ -d "/var/www" ]; then
+        sudo chown -R "$USER":"$USER" /var/www
+        sudo chmod -R 755 /var/www
+else
+        sudo mkdir -p /var/www
+        sudo chown -R "$USER":"$USER" /var/www
+        sudo chmod -R 755 /var/www
 fi
 
-sudo systemctl restart nginx
+for dir in /var/www/{html,error}; do
+        if ! [ -d "$dir" ]; then
+                mkdir -p "$dir"
+        fi
+done
 
+echo "Hello World!" > /var/www/html/index.html
+
+echo "Ceci n'est pas une page" > /var/www/html/error_404.html
+
+sudo cp /etc/nginx/sites-enabled/default nginx-sites-enabled_default.backup
+
+server_config=\
+"server {
+                listen 80 default_server;
+                listen [::]:80 default_server;
+                root /var/www/html;
+                index index.html index.htm index.nginx-debian.html
+                server_name_;
+                add_header X-Served-By \$hostname;
+                location / {
+                        try_files \$uri \$uri/ =404;
+                }
+                if (\$request_filename ~ redirect_me){
+                        rewrite ^ https://th3-gr00t.tk/ permanent;
+                }
+                error_page 404 /error_404.html;
+                location = /error_404.html {
+                        internal;
+                }
+}"
+
+echo "$server_config" | sudo dd status=none of=/etc/nginx/sites-enabled/default
+
+if [ "$(pgrep -c nginx)" -le 0 ]; then
+        sudo service nginx start
+else
+        sudo service nginx restart
+fi
