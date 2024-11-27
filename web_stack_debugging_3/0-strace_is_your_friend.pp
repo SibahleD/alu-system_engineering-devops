@@ -1,7 +1,5 @@
-# puppet that fixs error
-#fixing misstyped .phpp to php
+exec { 'fix-server':
+  command => 'sed -i "s/phpp/php/g" /var/www/html/wp-settings.php',
+  path    => '/usr/bin:/bin',
+}
 
-exec ( 'fix-server':
-    command => 'sed -i s/phpp/php/g /var/www/html/wp-settings.php',
-    path    => '/usr/bin/:/bin'
-)
