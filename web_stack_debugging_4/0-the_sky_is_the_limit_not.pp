@@ -1,13 +1,10 @@
-# increasing hard and soft limit for the servers
+# puppet that increases the nginx limit
 
 #increase limit
-exec { 'increase-hard-limit':
-    command => 'sed -i "/holberton hard/s/5/50000" /etc/security/limits.conf',
-    path    => '/bin/',
+exec { 'increase-ulimit':
+    command => '/bin/sed -i \'sULIMIT="-n 15"/ULIMIT="-n 4096"/\' /etc/default/nginx',
 }
 
-#increase soft limit
-exec { 'increase-soft-limit':
-    command => 'sed -i "/holberton soft/s/4/50000" /etc/security/limits.conf',
-    path    => '/bin/',
+exec { 'restart nginx':
+    command => 'usr/sbin/service nginx restart'
 }
