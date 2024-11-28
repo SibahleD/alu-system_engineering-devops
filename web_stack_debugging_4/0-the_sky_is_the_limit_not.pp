@@ -1,4 +1,4 @@
-# increasing hard and soft limit for the server
+# increasing hard and soft limit for the servers
 
 #increase limit
 exec { 'increase-hard-limit':
